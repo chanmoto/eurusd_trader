@@ -1,18 +1,35 @@
-from fastapi import FastAPI
+import nest_asyncio
+import uvicorn
+from fastapi import Body, FastAPI
+from sqlalchemy_utils import get_class_by_table
+from sqlalchemy.orm import Session
+from fastapi import APIRouter, Depends
+from sqlalchemy.sql import func
 
-from app.api.routes.router import api_router
-from app.core.config import API_PREFIX, APP_NAME, APP_VERSION, IS_DEBUG
-from app.core.event_handlers import start_app_handler, stop_app_handler
+#Binary trader
+#Trainデータの作成
+#解析期間　WSIZE　96日　-->　a(n=32)+b(n=32)+c(n=32)　　TRAIN時に　Aはa,b、Bはb,cを使う　　
+#テンソル　０：終値　１：高値－終値　２：終値－安値
+#正規化　MAX-MIN　（A,B別々に正規化）　
 
+#5分足、３０分足、４時間足　バージョン
+#df1 = EURUSD.oj5k5.csv'
+#df2 = EURUSD.oj5k30.csv'
+#df3 = EURUSD.oj5k240.csv'
+#HIGH　×　LOW　外積バージョン
 
-def get_app() -> FastAPI:
-    """FastAPI app controller"""
-    fast_app = FastAPI(title=APP_NAME, version=APP_VERSION, debug=IS_DEBUG)
-    fast_app.include_router(api_router, prefix=API_PREFIX)
-    fast_app.add_event_handler("startup", start_app_handler(fast_app))
-    fast_app.add_event_handler("shutdown", stop_app_handler(fast_app))
+app = FastAPI()   
 
-    return fast_app
-
-
-app = get_app()
+@app.on_event("startup")
+async def startup_event():
+    print("*** startup event ***")
+    
+if __name__ == "__main__":
+    try:
+        b = start()
+    except:
+        x('Failed Start')
+        quit()
+    
+    nest_asyncio.apply()
+    uvicorn.run(app, port=80)
